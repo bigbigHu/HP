@@ -109,7 +109,6 @@ class OrderList extends Component {
 		});
 	}
 	handleCancel = () => {
-		console.log(11);
 		this.setState({
 			visible: false
 		})
