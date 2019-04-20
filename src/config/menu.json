@@ -1,0 +1,52 @@
+[
+	{
+		"id": "首页",
+		"icon": "",
+		"path": "",
+		"routeId": "Home"
+	},
+	{
+		"id": "基础",
+		"icon": "",
+		"path": "UPS",
+		"routeId": "UPS",
+		"child": [
+			{
+				"id": "仓库基础数据",
+				"icon": "user",
+				"path": "WarehouseBasicData",
+				"routeId": "WarehouseBasicData",
+				"child": [
+					{
+						"id": "仓库管理",
+						"icon": "",
+						"path": "WarehouseManage",
+						"routeId": "UPS_WAREHOUSE_MANAGE"
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "订单",
+		"icon": "",
+		"path": "OMS",
+		"routeId": "OMS",
+		"child": [
+			{
+				"id": "订单基础数据",
+				"icon": "laptop",
+				"path": "OrderData",
+				"routeId": "OrderData",
+				"child": [
+					{
+						"id": "订单管理",
+						"icon": "",
+						"path": "OrderList",
+						"routeId": "OMS_ORDER_MANAGE"
+					}
+				]
+			}
+		]
+	}
+]
