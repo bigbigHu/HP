@@ -1,27 +1,33 @@
+import service from '@/config/service';
+
 export default {
     namespace: 'todo',
     state: {},
     reducers: {
         init (state, { payload }) {
         // 保存数据到 state
-        
-            
             return {...state, ...payload};
         },
         adlist (state, { payload }) {
-            // console.log(payload);
             const { tableData } = state;
-            tableData.push(payload.payload)
-            console.log(state)
+            tableData.push(payload);
             return {...state};
         }
     },
     effects: {
         *add (action, { put, call }) {
-            console.log(3333333333333333)
             yield put({
                 type: 'adlist',
                 payload: action
+            });
+            yield action.callback('请求成功了');
+        },
+        *newAdd (action, { put, call }) {
+            const result = yield call(service.orderAdd, action.payload);
+            console.log(result);
+            yield put({
+                type: 'adlist',
+                payload: result.data.data
             });
             yield action.callback('请求成功了');
             // setTimeout(() => {

@@ -96,9 +96,10 @@ class OrderList extends Component {
 					visible: false
 				});
 				value.key = this.props.todo.tableData.length + 1;
+				const self = this;
 				// 新增
 				this.props.dispatch({
-					type: 'todo/add',
+					type: 'todo/newAdd',
 					payload: value,
 					callback: (info) => {
 						message.success(info);
@@ -114,7 +115,6 @@ class OrderList extends Component {
 		})
 	}
 	render () {
-		console.log(this.props);
 		const { getFieldDecorator } = this.props.form;
 		const { todo } = this.props;
 		return (
