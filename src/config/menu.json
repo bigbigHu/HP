@@ -2,7 +2,7 @@
 	{
 		"id": "首页",
 		"icon": "",
-		"path": "",
+		"path": "Home",
 		"routeId": "Home"
 	},
 	{

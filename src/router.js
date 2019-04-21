@@ -78,9 +78,9 @@ class RouterConfig extends Component {
             menuConfig.map((v, i) => {
               if (v.child) {
                 const ChildrenLayout = HocHeader(SubMenu);
-                return <Route key={v.routeId} path={`/${v.routeId}`} render={(props) => <ChildrenLayout {...props} {...this.props}  childMenu={v.child} />} />
+                return <Route key={v.path} path={`/${v.path}`} render={(props) => <ChildrenLayout {...props} {...this.props}  childMenu={v.child} />} />
               }
-              return <Route key={v.routeId} path={`/${v.routeId}`} component={NewHome} />
+              return <Route key={v.path} path={`/${v.path}`} component={NewHome} />
             })
           }
         </Switch>
