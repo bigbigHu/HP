@@ -6,44 +6,73 @@
 		"routeId": "Home"
 	},
 	{
-		"id": "基础",
+		"id": "平台运营",
 		"icon": "",
-		"path": "UPS",
-		"routeId": "UPS",
+		"path": "OMS",
+		"routeId": "OMS",
 		"child": [
 			{
-				"id": "仓库基础数据",
+				"id": "亚马逊运营",
 				"icon": "user",
-				"path": "WarehouseBasicData",
-				"routeId": "WarehouseBasicData",
+				"path": "AmazonOperation",
+				"routeId": "AmazonOperation",
 				"child": [
 					{
-						"id": "仓库管理",
+						"id": "订单",
 						"icon": "",
-						"path": "WarehouseManage",
-						"routeId": "UPS_WAREHOUSE_MANAGE"
+						"path": "AmazonOrder",
+						"permission": "/OMS/AmazonOperation/AmazonOrder",
+						"routeId": "OMS_ORDERLIST_AMAZON_OPERATION_MANAGE",
+						"child": [
+							{
+							  "id": "详情",
+							  "path": "Detail",
+							  "icon": "",
+                "visible": false,
+                "permission": "/OMS/AmazonOperation/AmazonOrder/detail",
+							  "routeId": "OMS_ORDER_DETAIL_AMAZON_OPERATION_MANAGE"
+							}
+						  ]
+					},
+					{
+						"id": "库存分析",
+						"icon": "",
+						"path": "AmazonInventory",
+						"permission": "/OMS/AmazonOperation/AmazonInventory",
+            "routeId": "OMS_INVENTORY_ANALYSIS_AMAZON_OPERATION_MANAGE",
+            "child": [
+							{
+							  "id": "详情",
+							  "path": "Detail",
+							  "icon": "",
+                "visible": false,
+                "permission": "/OMS/AmazonOperation/AmazonInventory/detail",
+							  "routeId": "OMS_INVENTORY_DETAIL_AMAZON_OPERATION_MANAGE"
+							}
+						]
 					}
 				]
 			}
 		]
 	},
 	{
-		"id": "订单",
+		"id": "供应链",
 		"icon": "",
-		"path": "OMS",
-		"routeId": "OMS",
+		"path": "SMS",
+		"routeId": "SMS",
 		"child": [
 			{
-				"id": "订单基础数据",
+				"id": "库存总览",
 				"icon": "laptop",
-				"path": "OrderData",
-				"routeId": "OrderData",
+				"path": "StockOverview",
+				"routeId": "StockOverview",
 				"child": [
 					{
-						"id": "订单管理",
+						"id": "库存",
 						"icon": "",
-						"path": "OrderList",
-						"routeId": "OMS_ORDER_MANAGE"
+						"path": "StockList",
+						"permission": "/SMS/StockOverview/StockList",
+						"routeId": "SMS_STOCK_OVERVIEW_MANAGE"
 					}
 				]
 			}

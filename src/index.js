@@ -2,6 +2,7 @@ import React from 'react';
 import dva from 'dva';
 import App from './router';
 import 'antd/dist/antd.css';
+import './index.css';
 
 // 1. Initialize
 const app = dva();

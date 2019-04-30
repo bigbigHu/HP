@@ -1,19 +1,22 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
+import { withRouter } from 'dva/router';
+import _ from 'lodash';
 import { 
-	Table,
 	Divider,
 	Button,
-	Tag,
-	Menu,
-	Dropdown,
-	Icon,
 	Modal,
 	Form,
 	Input,
-	message
+	message,
+	Collapse,
+	Col,
 } from 'antd';
-
+import {
+	CardForm,
+	CardTable,
+	ButtonField,
+} from '@/common/components';
 const data = [{
   key: '1',
   name: 'John Brown',
@@ -31,12 +34,18 @@ const data = [{
   address: 'Sidney No. 1 Lake Park',
 }];
 
-
+const confirm = Modal.confirm;
+const Panel = Collapse.Panel;
+function callback (key){
+	console.log(key);
+}
 class OrderList extends Component {
 	constructor (props) {
 		super(props);
 		this.state = {
-			visible: false
+			visible: false,
+			dialogTitle: '新增',
+			rowData: {},
 		}
 		this.columns = [
 			{
@@ -57,12 +66,14 @@ class OrderList extends Component {
 			{
 				title: '操作',
 				key: 'action',
-				render: text => {
+				render: (text, rowData, index) => {
 					return (
 						<div>
-							<a onClick={this.handleEdit}>编辑</a>
+							<a href="javascript:;" onClick={() => this.handleEdit(rowData)}>编辑</a>
 							<Divider type="vertical" />
-							<a onClick={this.handleClose}>删除</a>
+							<a href="javascript:;" onClick={() => this.handleDelete(rowData)}>删除</a>
+							<Divider type="vertical" />
+							<a href="javascript:;" onClick={() => this.handleJumpDetail(rowData)}>详情</a>
 						</div>
 						
 					)
@@ -79,15 +90,30 @@ class OrderList extends Component {
 		})
 	}
 	handleAdd = () => {
-		this.setState({
-			visible: true
+		this.setState(_.assign(this.state, { 
+			visible: true,
+			dialogTitle: '新增',
+			rowData: {},
+		 }))
+	}
+	handleEdit = (rowData) => {
+		this.setState(_.assign(this.state, { 
+			visible: true,
+			dialogTitle: '编辑',
+			rowData: rowData,
+		 }))
+	}
+	handleDelete = (rowData) => {
+		confirm({
+			title: '删除',
+			content: '确认删除？',
+			onOk () {
+				console.log('ok');
+			},
+			onCancel () {
+				console.log('onCancel');
+			}
 		})
-	}
-	handleEdit = () => {
-
-	}
-	handleClose = () => {
-
 	}
 	handleOk = () => {
 		this.props.form.validateFields((err, value) => {
@@ -96,7 +122,6 @@ class OrderList extends Component {
 					visible: false
 				});
 				value.key = this.props.todo.tableData.length + 1;
-				const self = this;
 				// 新增
 				this.props.dispatch({
 					type: 'todo/newAdd',
@@ -113,27 +138,55 @@ class OrderList extends Component {
 			visible: false
 		})
 	}
+	handleJumpDetail = (rowData) => {
+		this.props.history.push({ pathname:'/OMS/AmazonOperation/AmazonOrder/detail', state: { age: rowData.age } });
+	}
 	render () {
 		const { getFieldDecorator } = this.props.form;
 		const { todo } = this.props;
+		const { rowData } = this.state;
 		return (
 			<div>
-				<Button onClick={this.handleAdd} type="primary">新增</Button>
-				<Table
-					bordered
+				<CardForm title="查询" layout="inline">
+					<div style={{ overflow: 'hidden' }}>
+						<Col span={8}>
+							<Form.Item label="條件1">
+								{getFieldDecorator('condition1', {
+
+								})(
+									<Input placeholder="placeholder" />
+								)}
+							</Form.Item>
+						</Col>
+					</div>
+					<ButtonField>
+						<Button htmlType="submit" type="primary" size="small" icon="search">查詢</Button>
+					</ButtonField>
+				</CardForm>
+				<CardTable
+					title="列表"
+					ref={(ref) => { this.table = ref; }}
+					style={{ marginTop: '20px' }}
 					columns={this.columns}
 					dataSource={todo.tableData || data}
-					rowKey={record => record.key}
+					rowKey={rowData => rowData.key}
+					actionstop={
+						[
+							<Button key="add_btn" onClick={this.handleAdd} icon="plus" type="primary">新增</Button>
+						]
+					}
 				/>
 				<Modal
-					title="新增"
+					title={this.state.dialogTitle}
 					visible={this.state.visible}
+					maskClosable={false}
 					onOk={this.handleOk}
 					onCancel={this.handleCancel}
 				>
 					<Form>
 						<Form.Item>
 							{getFieldDecorator('name', {
+								initialValue: rowData.name,
 								rules: [{ required: true, message: '请输入姓名' }],
 							})(
 								<Input placeholder="name" />
@@ -141,6 +194,7 @@ class OrderList extends Component {
 						</Form.Item>
 						<Form.Item>
 							{getFieldDecorator('age', {
+								initialValue: rowData.age,
 								rules: [{ required: true, message: '请输入年龄' }],
 							})(
 								<Input placeholder="age" />
@@ -148,6 +202,7 @@ class OrderList extends Component {
 						</Form.Item>
 						<Form.Item>
 							{getFieldDecorator('address', {
+								initialValue: rowData.address,
 								rules: [{ required: true, message: '请输入地址' }],
 							})(
 								<Input placeholder="address" />
@@ -160,4 +215,4 @@ class OrderList extends Component {
 	}
 }
 
-export default connect(state => ({ ...state }))(Form.create()(OrderList));
+export default connect(state => ({ ...state }))(Form.create()(withRouter(OrderList)));

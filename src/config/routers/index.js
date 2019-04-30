@@ -1,7 +1,7 @@
-import ups from './ups';
+import sms from './sms';
 import oms from './oms';
 
 export default {
-  ...ups,
+  ...sms,
   ...oms
 };
