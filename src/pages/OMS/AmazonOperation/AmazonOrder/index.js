@@ -197,10 +197,10 @@ class OrderList extends Component {
 	}
 	handleSearch = (e) => {
 		e.preventDefault();
-		console.log(this);
-		let formData = this.searchForm.props.form.getFieldsValue();
+		console.log();
+		// 这里为什么不能使用this.searchForm.props.form.getFieldsValue()
+		let formData = this.props.form.getFieldsValue();
 		console.log(formData);
-		console.log(this.state.pageVo);
 		this.props.dispatch({
 			type: 'amazonOrder/query',
 			payload: {

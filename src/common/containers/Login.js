@@ -13,6 +13,7 @@ const { Item } = Form;
 class LoginPage extends Component {
   componentDidMount () {
     // To disabled submit button at the beginning.
+    console.log(this.props.history);
     this.props.form.validateFields();
 	}
 	
@@ -24,7 +25,7 @@ class LoginPage extends Component {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-				setToken(values.userName);
+        setToken(values.userName);
         // this.props.history.push('/');
         location.href = '/';
       }
