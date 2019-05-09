@@ -3,5 +3,5 @@ import ButtonField from './ButtonField';
 
 export {
   FormField,
-  ButtonField
+  ButtonField,
 };

@@ -9,36 +9,66 @@ import {
 	Form,
 	Input,
 	message,
-	Collapse,
 	Col,
 } from 'antd';
 import {
 	CardForm,
 	CardTable,
-	ButtonField,
+  ButtonField,
 } from '@/common/components';
-const data = [{
-  key: '1',
-  name: 'John Brown',
-  age: 32,
-  address: 'New York No. 1 Lake Park',
-}, {
-  key: '2',
-  name: 'Jim Green',
-  age: 42,
-  address: 'London No. 1 Lake Park',
-}, {
-  key: '3',
-  name: 'Joe Black',
-  age: 32,
-  address: 'Sidney No. 1 Lake Park',
-}];
 
 const confirm = Modal.confirm;
-const Panel = Collapse.Panel;
-function callback (key){
-	console.log(key);
-}
+const ModalForm = Form.create()(
+	class M extends Component {
+		render () {
+			const {
+				dialogTitle,
+				visible,
+				handleOk,
+				handleCancel,
+				form,
+				rowData,
+			} = this.props;
+			return (
+				<Modal
+				title={dialogTitle}
+				visible={visible}
+				maskClosable={false}
+				onOk={handleOk}
+				onCancel={handleCancel}
+				>
+					<Form>
+						<Form.Item>
+							{form.getFieldDecorator('name', {
+								initialValue: rowData.name,
+								rules: [{ required: true, message: '请输入姓名' }],
+							})(
+								<Input placeholder="name" autoComplete="off" />
+							)}
+						</Form.Item>
+						<Form.Item>
+							{form.getFieldDecorator('age', {
+								initialValue: rowData.age,
+								rules: [{ required: true, message: '请输入年龄' }],
+							})(
+								<Input placeholder="age" autoComplete="off" />
+							)}
+						</Form.Item>
+						<Form.Item>
+							{form.getFieldDecorator('address', {
+								initialValue: rowData.address,
+								rules: [{ required: true, message: '请输入地址' }],
+							})(
+								<Input placeholder="address" autoComplete="off" />
+							)}
+						</Form.Item>
+					</Form>
+				</Modal>
+			);
+		}
+	}
+);
+
 class OrderList extends Component {
 	constructor (props) {
 		super(props);
@@ -46,7 +76,12 @@ class OrderList extends Component {
 			visible: false,
 			dialogTitle: '新增',
 			rowData: {},
-		}
+			pageVo: {
+				pageNo: '1',
+				pageSize: '10',
+			},
+			formValues: {},
+		};
 		this.columns = [
 			{
 				title: '姓名',
@@ -66,7 +101,7 @@ class OrderList extends Component {
 			{
 				title: '操作',
 				key: 'action',
-				render: (text, rowData, index) => {
+				render: (text, rowData) => {
 					return (
 						<div>
 							<a href="javascript:;" onClick={() => this.handleEdit(rowData)}>编辑</a>
@@ -74,87 +109,172 @@ class OrderList extends Component {
 							<a href="javascript:;" onClick={() => this.handleDelete(rowData)}>删除</a>
 							<Divider type="vertical" />
 							<a href="javascript:;" onClick={() => this.handleJumpDetail(rowData)}>详情</a>
-						</div>
-						
-					)
-				}
-			}
-		]
-	}
+						</div>	
+					);
+				},
+			},
+		];
+  }
 	componentDidMount () {
+		let formData = this.props.form.getFieldsValue();
 		this.props.dispatch({
-			type: 'todo/init',
+			type: 'amazonOrder/query',
 			payload: {
-				tableData: data
-			}
-		})
+				params: _.assign(
+					formData,
+					{ pageVo: this.state.pageVo }
+				),
+			},
+		});
 	}
 	handleAdd = () => {
 		this.setState(_.assign(this.state, { 
 			visible: true,
 			dialogTitle: '新增',
 			rowData: {},
-		 }))
+		}));
 	}
 	handleEdit = (rowData) => {
 		this.setState(_.assign(this.state, { 
 			visible: true,
 			dialogTitle: '编辑',
 			rowData: rowData,
-		 }))
+		}));
 	}
 	handleDelete = (rowData) => {
+		const _this = this;
 		confirm({
 			title: '删除',
 			content: '确认删除？',
 			onOk () {
-				console.log('ok');
+				_this.props.dispatch({
+					type: 'amazonOrder/remove',
+					payload: {
+						params: {
+							id: rowData.id,
+						},
+					},
+				});
 			},
 			onCancel () {
 				console.log('onCancel');
-			}
-		})
+			},
+		});
 	}
-	handleOk = () => {
-		this.props.form.validateFields((err, value) => {
+	handleOk = (e) => {
+		e.preventDefault();
+		this.modalForm.props.form.validateFields((err, value) => {
+			console.log(value);
 			if (!err) {
-				this.setState({
-					visible: false
-				});
-				value.key = this.props.todo.tableData.length + 1;
-				// 新增
+				if (_.isEmpty(this.state.rowData)) {
+					value.key = this.props.amazonOrder.content.length + 1;
+				}
+				// 新增、编辑
 				this.props.dispatch({
-					type: 'todo/newAdd',
-					payload: value,
+					type: _.isEmpty(this.state.rowData)  ? 'amazonOrder/add' : 'amazonOrder/edit',
+					payload: {
+						params: _.assign({}, this.state.rowData, value),
+					},
 					callback: (info) => {
 						message.success(info);
-					}
-				})
+						this.setState(_.assign(this.state,{
+							visible: false,
+							formValues: value,
+						}));
+						setTimeout(this.modalForm.props.form.resetFields,300);
+					},
+				});
 			}
 		});
 	}
 	handleCancel = () => {
 		this.setState({
-			visible: false
-		})
+			visible: false,
+		});
 	}
 	handleJumpDetail = (rowData) => {
 		this.props.history.push({ pathname:'/OMS/AmazonOperation/AmazonOrder/detail', state: { age: rowData.age } });
 	}
+	handleSearch = (e) => {
+		e.preventDefault();
+		console.log(this);
+		let formData = this.searchForm.props.form.getFieldsValue();
+		console.log(formData);
+		console.log(this.state.pageVo);
+		this.props.dispatch({
+			type: 'amazonOrder/query',
+			payload: {
+				params: _.assign(
+					formData,
+					{ pageVo: this.state.pageVo }
+				),
+			},
+		});
+	}
+
+	handleTableChange = (pagination, filters, sorter) => {
+		const { formValues } = this.state;
+		this.setState(_.assign(this.state, {
+			pageVo: {
+				pageSize: pagination.pageSize,
+				pageNo: pagination.current,
+			},
+		}));
+
+		this.props.dispatch({
+			type: 'amazonOrder/query',
+			payload: {
+				params: _.assign(
+					formValues,
+					{ pageVo: this.state.pageVo }
+				),
+			},
+		});
+	}
+	
 	render () {
 		const { getFieldDecorator } = this.props.form;
-		const { todo } = this.props;
-		const { rowData } = this.state;
+		const { amazonOrder:{ content, pageVo, total } } = this.props;
+		const { rowData, visible, dialogTitle } = this.state;
+		console.log(this);
+		const methods = {
+			handleOk: this.handleOk,
+			handleCancel: this.handleCancel,
+		};
+
 		return (
-			<div>
-				<CardForm title="查询" layout="inline">
+      <div>
+				<CardForm
+          title="查询"
+          layout="inline"
+          onSubmit={this.handleSearch}
+          wrappedComponentRef={ref => { this.searchForm = ref; }}
+				>
 					<div style={{ overflow: 'hidden' }}>
 						<Col span={8}>
-							<Form.Item label="條件1">
-								{getFieldDecorator('condition1', {
+							<Form.Item label="名称">
+								{getFieldDecorator('name', {
+								
+								})(
+									<Input placeholder="" autoComplete="off" />
+								)}
+							</Form.Item>
+						</Col>
+						<Col span={8}>
+							<Form.Item label="年龄">
+								{getFieldDecorator('age', {
 
 								})(
-									<Input placeholder="placeholder" />
+									<Input placeholder="" autoComplete="off" />
+								)}
+							</Form.Item>
+						</Col>
+						<Col span={8}>
+							<Form.Item label="地址">
+								{getFieldDecorator('address', {
+
+								})(
+									<Input placeholder="" autoComplete="off" />
 								)}
 							</Form.Item>
 						</Col>
@@ -168,50 +288,23 @@ class OrderList extends Component {
 					ref={(ref) => { this.table = ref; }}
 					style={{ marginTop: '20px' }}
 					columns={this.columns}
-					dataSource={todo.tableData || data}
+					dataSource={content||[]}
 					rowKey={rowData => rowData.key}
+					onChange={this.handleTableChange}
+					showTotal={total}
+					total={total}
+					pageVo={pageVo}
 					actionstop={
 						[
-							<Button key="add_btn" onClick={this.handleAdd} icon="plus" type="primary">新增</Button>
+							<Button key="add_btn" onClick={this.handleAdd} icon="plus" type="primary">新增</Button>,
 						]
-					}
+          }
 				/>
-				<Modal
-					title={this.state.dialogTitle}
-					visible={this.state.visible}
-					maskClosable={false}
-					onOk={this.handleOk}
-					onCancel={this.handleCancel}
-				>
-					<Form>
-						<Form.Item>
-							{getFieldDecorator('name', {
-								initialValue: rowData.name,
-								rules: [{ required: true, message: '请输入姓名' }],
-							})(
-								<Input placeholder="name" />
-							)}
-						</Form.Item>
-						<Form.Item>
-							{getFieldDecorator('age', {
-								initialValue: rowData.age,
-								rules: [{ required: true, message: '请输入年龄' }],
-							})(
-								<Input placeholder="age" />
-							)}
-						</Form.Item>
-						<Form.Item>
-							{getFieldDecorator('address', {
-								initialValue: rowData.address,
-								rules: [{ required: true, message: '请输入地址' }],
-							})(
-								<Input placeholder="address" />
-							)}
-						</Form.Item>
-					</Form>
-				</Modal>
+				<ModalForm {...methods} {...this.state}
+				wrappedComponentRef={ref => { this.modalForm = ref; }}
+				/>
 			</div>
-		)
+		);
 	}
 }
 

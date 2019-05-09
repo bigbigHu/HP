@@ -3,5 +3,5 @@ import oms from './oms';
 
 export default {
   ...sms,
-  ...oms
+  ...oms,
 };

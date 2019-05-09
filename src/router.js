@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'dva';
 import { Router, Route, Switch, Link, Redirect } from 'dva/router';
 import dynamic from 'dva/dynamic';
 import _ from 'lodash';
@@ -7,6 +8,8 @@ import {
   Menu,
   Breadcrumb,
   Icon,
+  LocaleProvider,
+  Spin,
 } from 'antd';
 
 import routers from '@/config/routers';
@@ -14,103 +17,93 @@ import Home from '@/pages/Home';
 import menuConfig from '@/config/menu.json';
 import NoFound from '@/common/containers/404';
 import Login from '@/common/containers/Login';
+import Footer from '@/common/containers/Layout/Footer';
 import { getToken } from '@/common/utils/storage';
 import logoImage from './logo.png';
 import { RightHeader } from '@/common/components/RightHeader';
+import styles from './index.less';
+import zh_CN from 'antd/lib/locale-provider/zh_CN';
+
 const { SubMenu } = Menu;
-const { Header, Sider, Content, Footer } = Layout;
+const { Header, Sider, Content } = Layout;
 
 // 主导航布局
 function HocHeader (IncomComponent) {
-  return class FactoryComponent extends Component {
+  return connect (state => ({...state})) (class FactoryComponent extends Component {
     constructor (props) {
       super(props);
       this.state = {
         basicLayoutSelectRow: [],
         siderLayoutSelectRow: [],
         itemLayoutSelectRow: [],
-      }
+      };
     }
     componentDidMount () {
       // 主导航解析
       const { location } = this.props.history;
       const [,mainName, siderName, itemName] = location.pathname.split('/');
-      // if (this.state.basicLayoutSelectRow[0] != mainName) {
-      //   this.setState(_.assign(this.state, {basicLayoutSelectRow: [mainName]}));
-      // } 
-      // if (this.state.siderLayoutSelectRow[0] != siderName) {
-      //   this.setState(_.assign(this.state, { siderLayoutSelectRow: [siderName] }));
-      // } 
-      // if (this.state.itemLayoutSelectRow[0] != itemName) {
-      //   this.setState(_.assign(this.state, { itemLayoutSelectRow: [itemName] }));
-      // }
-      // console.log( this.state.basicLayoutSelectRow[0]);
       this.setState({
         basicLayoutSelectRow: [mainName],
         siderLayoutSelectRow: [siderName],
-        itemLayoutSelectRow: [itemName]
-      }, () => {
-        console.log(this.state.siderLayoutSelectRow, 1111);
+        itemLayoutSelectRow: [itemName],
       });
     }
     
     shouldComponentUpdate (nextProps, nextState) {
-      console.log(nextProps,nextState);
-      return true;
+      return true; 
     }
 
     basicLayoutSelect = ({ selectedKeys }) => {
       this.setState({
-        basicLayoutSelectRow: selectedKeys
+        basicLayoutSelectRow: selectedKeys,
       });
     }
     siderOpenChange = (selectedKeys) => {
       this.setState({
-        siderLayoutSelectRow: selectedKeys
+        siderLayoutSelectRow: selectedKeys,
       });
     }
-    render() {
+    render () {
       const { basicLayoutSelectRow } = this.state;
-      const logoContainer = {
-        width: '120px',
-        height: '31px',
-        margin: '16px 30px 16px 0',
-        float: 'left',
-      }
+      const isLoading = this.props.loading.global;
       return (
-        <Layout>
-          <Layout>
-            <Header className="header">
-              <div>
-                <div style={{ float: 'left' }}>
-                  <div className="" style={logoContainer}>
-                    <img src={logoImage} style={{ width: '100%', height: '100%', verticalAlign: 'top', }} />
+        <LocaleProvider locale={zh_CN}>
+          <Spin tip="Loading..." spinning={isLoading}>
+            <Layout>
+              <Layout>
+                <Header className="header">
+                  <div>
+                    <div style={{ float: 'left' }}>
+                      <div className={styles.logo}>
+                        <img src={logoImage} className={styles.image} />
+                      </div>
+                      <Menu
+                        theme="dark"
+                        mode="horizontal"
+                        selectedKeys={basicLayoutSelectRow}
+                        style={{ lineHeight: '64px' }}
+                        onSelect={this.basicLayoutSelect}
+                      >
+                        {
+                          menuConfig.map((v) => {
+                            return v.child && <Menu.Item key={v.path}><Link to={`/${v.path}`}>{v.id}</Link></Menu.Item>;
+                          })
+                        }
+                      </Menu>
+                    </div>
+                    <RightHeader />
                   </div>
-                  <Menu
-                    theme="dark"
-                    mode="horizontal"
-                    selectedKeys={basicLayoutSelectRow}
-                    style={{ lineHeight: '64px' }}
-                    onSelect={this.basicLayoutSelect}
-                  >
-                    {
-                      menuConfig.map((v) => {
-                        return v.child && <Menu.Item key={v.path}><Link to={`/${v.path}`}>{v.id}</Link></Menu.Item>;
-                      })
-                    }
-                  </Menu>
-                </div>
-                <RightHeader />
-              </div>
-            </Header>
-          </Layout>
-          <Layout>
-            <IncomComponent siderOpenChange={this.siderOpenChange} propsState={this.state} {...this.props} />
-          </Layout>
-        </Layout>
-      )
+                </Header>
+              </Layout>
+              <Layout>
+                <IncomComponent siderOpenChange={this.siderOpenChange} propsState={this.state} {...this.props} />
+              </Layout>
+            </Layout>
+          </Spin>
+        </LocaleProvider>
+      );
     }
-  }
+  });
 }
 
 // 侧边导航布局
@@ -120,21 +113,19 @@ function HocSider (IncomComponent, childMenu, crumbs = []) {
       super(props);
       this.state = {
         collapsed: false,
-        menuOpenKey: this.props.propsState.siderLayoutSelectRow,
-      }
-    }
-    componentDidMount () {
-      console.log(this);
+        siderOpenChange: this.props.siderOpenChange,
+      };
     }
 
     onCollapse = (collapsed) => {
-      console.log(collapsed);
+      if (collapsed) {
+        this.state.siderOpenChange();
+      }
       this.setState({ collapsed });
     }
 
     render () {
-      const { match, propsState, siderOpenChange } = this.props;
-      console.log(this.props);
+      const { propsState, siderOpenChange } = this.props;
       return (
         <Layout>
           <Sider
@@ -161,7 +152,7 @@ function HocSider (IncomComponent, childMenu, crumbs = []) {
                         v.child && v.child.map((item) => {
                           return (
                             <Menu.Item key={item.path}><Link replace to={item.permission}>{item.id}</Link></Menu.Item>
-                          )
+                          );
                         })
                       }
                     </SubMenu>
@@ -174,7 +165,7 @@ function HocSider (IncomComponent, childMenu, crumbs = []) {
             <Breadcrumb style={{ margin: '16px 0' }}>
             {
               crumbs.map((v, i) => {
-                return <Breadcrumb.Item key={i}>{v}</Breadcrumb.Item>
+                return <Breadcrumb.Item key={i}>{v}</Breadcrumb.Item>;
               })
             }
             </Breadcrumb>
@@ -184,28 +175,29 @@ function HocSider (IncomComponent, childMenu, crumbs = []) {
             >
               <IncomComponent />
             </Content>
-            <Footer style={{ textAlign: 'center' }}>
-              Bidsprime ©2019 Created by Bids
-            </Footer>
+            <Footer />
           </Layout>
-        </Layout>
-        
-      )
+        </Layout> 
+      );
     }
-  }
+  };
 }
 
 // 动态加载路由
-function dynamicComponent({ app }, item) {
+function dynamicComponent ({ app }, item) {
   return dynamic({
     app,
-    component: routers[item.routeId].component
+    models: routers[item.routeId].models,
+    component: routers[item.routeId].component,
   });
 }
 
 const NewHome = HocHeader(Home);
 const NewNoFound = HocHeader(NoFound);
 class RouterConfig extends Component {
+  constructor (props) {
+    super(props);
+  }
   menuAnalysis = () => {
     let routerMenu = [];
     menuConfig.forEach(v => {
@@ -214,39 +206,38 @@ class RouterConfig extends Component {
         key: v.path,
         redirect: true,
         from: `/${v.path}`,
-        to: `/${v.path}/${v.child[0].path}/${v.child[0].child[0].path}`
+        to: `/${v.path}/${v.child[0].path}/${v.child[0].child[0].path}`,
       });
       v.child && v.child.forEach(sider => {
         routerMenu.push({
           key: sider.path,
           redirect: true,
           from: `/${v.path}/${sider.path}`,
-          to: `/${v.path}/${sider.path}/${sider.child[0].path}`
+          to: `/${v.path}/${sider.path}/${sider.child[0].path}`,
         });
         sider.child.forEach(item => {
           routerMenu.push({
             key: item.path,
             redirect: false,
             path: `/${v.path}/${sider.path}/${item.path}`,
-            component: HocHeader(HocSider(dynamicComponent(this.props, item), v.child, [v.id, sider.id, item.id]))
+            component: HocHeader(HocSider(dynamicComponent(this.props, item), v.child, [v.id, sider.id, item.id])),
           });
           item.child && item.child.forEach(detail => {
             routerMenu.push({
               key: detail.path,
               redirect: false,
               path: `/${v.path}/${sider.path}/${item.path}/${detail.path}`,
-              component: HocHeader(HocSider(dynamicComponent(this.props, detail), v.child, [v.id, sider.id, item.id, detail.id]))
-            })
-          })
-        })
+              component: HocHeader(HocSider(dynamicComponent(this.props, detail), v.child, [v.id, sider.id, item.id, detail.id])),
+            });
+          });
+        });
       });
     });
     return routerMenu;
   }
-  render() {
+  render () {
     const { history } = this.props;
     const isLogin = getToken();
-    console.log(isLogin);
     return (
       <Router history={history}>
         <Switch>
@@ -259,14 +250,14 @@ class RouterConfig extends Component {
               return v.redirect ? <Redirect exact key={v.key} from={v.from} to={v.to} /> : <Route exact key={v.key} path={v.path} render={props => {
                 return isLogin
                 ? <Components {...props} />
-                : <Redirect to="/login" />
+                : <Redirect to="/login" />;
                 }} />;
             })
           }
           <Route component={NewNoFound} />
         </Switch>
       </Router>
-    )
+    );
   }
 }
 

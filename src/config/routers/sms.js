@@ -4,4 +4,4 @@ export default {
     'SMS_STOCK_OVERVIEW_MANAGE': { // 库存总览列表
     component: () => import('@/pages/SMS/StockOverview/StockList/index'),
     },
-}
+};

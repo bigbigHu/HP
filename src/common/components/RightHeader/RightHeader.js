@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react';
 import HeaderDropdown from '../HeaderDropdown';
-import SelectLang from '../SelectLang';
 import { removeToken, getToken } from '@/common/utils/storage';
 import { withRouter } from 'dva/router';
 import {
@@ -10,7 +9,6 @@ import {
   Icon,
 } from 'antd';
 import styles from './index.less';
-console.log(styles);
 
 class RightHeader extends PureComponent {
 
@@ -30,9 +28,9 @@ class RightHeader extends PureComponent {
     };
     const menu = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
-        <Menu.Item key="logout">
+        <Menu.Item key="logout" onClick={this.signOut}>
           <Icon type="logout" />
-          <span onClick={this.signOut}>登出</span>
+          <span>登出</span>
         </Menu.Item>
       </Menu>
     );
@@ -53,9 +51,8 @@ class RightHeader extends PureComponent {
         ) : (
           <Spin size="small" style={{ marginLeft: 8, marginRight: 8 }} />
         )}
-        <SelectLang />
       </div>
-    )
+    );
   }
 }
 

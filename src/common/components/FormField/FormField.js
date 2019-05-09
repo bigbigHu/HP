@@ -17,7 +17,7 @@ class FormField extends Component {
     return (
       <Form.Item>
       </Form.Item>
-    )
+    );
   }
 }
 

@@ -8,7 +8,7 @@ class DetailPage extends Component {
   render () {
     return (
       <div>这是详情页</div>
-    )
+    );
   }
 }
 

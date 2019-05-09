@@ -17,6 +17,7 @@ const cardProps = [
 
 const formProps = [
   'layout',
+  'onSubmit',
 ];
 
 class CardForm extends Component {
@@ -29,14 +30,12 @@ class CardForm extends Component {
     const form = _.pick(props, formProps);
     return (
       <Card {...card}>
-        <Form {...form}
-          ref = {(ref) => { this.form1 = ref; }}
-        >
+        <Form {...form}>
           {children}
         </Form>
       </Card>
-    )
+    );
   }
 }
 
-export default CardForm;
+export default Form.create()(CardForm);

@@ -4,7 +4,7 @@ import {
 
 import {
   CardForm,
-  CardTable
+  CardTable,
 } from './Cards';
 
 import {
@@ -12,10 +12,15 @@ import {
   ButtonField,
 } from './FormField';
 
+import {
+  Loading,
+} from './Loading';
+
 export {
   Card,
   CardForm,
   FormField,
   ButtonField,
   CardTable,
-}
+  Loading,
+};

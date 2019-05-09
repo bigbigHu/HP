@@ -40,6 +40,7 @@
     "less-loader": "^4.1.0",
     "lodash": "^4.17.11",
     "mini-css-extract-plugin": "0.5.0",
+    "nprogress": "^0.2.0",
     "optimize-css-assets-webpack-plugin": "5.0.1",
     "pnp-webpack-plugin": "1.2.1",
     "postcss-flexbugs-fixes": "4.1.0",
@@ -125,7 +126,7 @@
       "react-app"
     ]
   },
-  "proxy": "http://localhost:3030/",
+  "proxy": "http://localhost:3030",
   "devDependencies": {
     "mockjs": "^1.0.1-beta3"
   }

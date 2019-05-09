@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import pick from 'lodash/pick';
+import _ from 'lodash';
+import styles from './index.less';
 import {
   Card,
-  Button,
   Table,
 } from 'antd';
 
@@ -10,32 +10,46 @@ const cardProps = [
   'title',
   'style',
   'actions',
-  'actionstop'
 ];
 const tableProps = [
   'bordered',
   'columns',
   'dataSource',
   'rowKey',
+  'pagination',
+  'onChange',
+  'total',
 ];
 
 class CardTable extends Component {
+
+  showTotal = (total) => {
+    return `共${total}条数据`;
+  }
+
   render () {
     const {
       children,
       ...props
     } = this.props;
-    const card = pick(props, cardProps);
-    const table = pick(props, tableProps);
-    console.log(this.props)
+    const card = _.pick(props, cardProps);
+    const table = _.pick(props, tableProps);
+    const pagination = {
+      showQuickJumper: true,
+      showSizeChanger: true,
+      total: table.total,
+      showTotal: this.showTotal,
+      loading: false,
+    };
+    table.pagination = _.assign(pagination, table.pagination);
     return (
       <Card {...card}>
-        <div style={{ position: 'absolute', right: '20px', zIndex: '1', top: '10px'}}>
+        <div className={styles.actions}>
           {this.props.actionstop}
         </div>
         <Table {...table}/>
       </Card>
-    )
+    );
   }
 }
 
